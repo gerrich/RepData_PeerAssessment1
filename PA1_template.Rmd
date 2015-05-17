@@ -5,26 +5,26 @@ output:
     keep_md: true
 ---
 
-```{r setoptions,echo=TRUE}
+```{r setoptions,echo=FALSE}
 library(knitr)
 opts_chunk$set(echo=TRUE, fig.keep="all", fig.path="figure/")
 ```
 
 ## Loading and preprocessing the data
 
-```{r _1_load_data,echo=TRUE}
+```{r _1_load_data}
 activity <- read.csv(unz("activity.zip","activity.csv"), header=T, colClasses=c("numeric","Date","numeric"))
 ```
 
 ## What is mean total number of steps taken per day?
 
-```{r _1_sum_steps,echo=TRUE}
+```{r _1_sum_steps}
 good <- activity[!is.na(activity[[1]]),]
 total_steps <- sum(good$steps)
 ```
 The total number of steps taken: `r total_steps`
 
-```{r _2_histogram,echo=TRUE}
+```{r _2_histogram}
 #head(good)
 sum_steps_per_day <- aggregate(steps ~ date, data = good, FUN = sum)
 library(ggplot2)
@@ -33,7 +33,7 @@ ggplot(sum_steps_per_day, aes(x=steps)) +
   ggtitle("Total number of steps per day, ignore NA.")
 ```
 
-```{r _3_total_steps_estimates,echo=TRUE}
+```{r _3_total_steps_estimates}
 mean_steps <- mean(sum_steps_per_day$steps)
 med_steps <- median(sum_steps_per_day$steps)
 ```
@@ -42,13 +42,13 @@ Median number of steps per day: `r med_steps`
 
 ## What is the average daily activity pattern?
 
-```{r _1_avg_steps_plot,echo=TRUE}
+```{r _1_avg_steps_plot}
 mean_steps_per_interval <- aggregate(steps ~ interval, data = good, FUN = mean)
 library(ggplot2)
 ggplot(mean_steps_per_interval, aes(x=interval, y=steps)) + geom_line()
 ```
 
-```{r _2_max_activity_interval,echo=TRUE}
+```{r _2_max_activity_interval}
 max_id <- which.max(mean_steps_per_interval$steps)
 max_steps_interval <- mean_steps_per_interval$interval[max_id]
 ```
@@ -57,12 +57,12 @@ max_steps_interval <- mean_steps_per_interval$interval[max_id]
 
 ## Imputing missing values
 
-```{r _1_missing_values,echo=TRUE}
+```{r _1_missing_values}
 total_missing <- sum(is.na(activity[[1]]))
 ```
 The total number of missing values in the dataset: `r total_missing`.
 
-```{r _2_fill_strategy,echo=TRUE}
+```{r _2_fill_strategy}
 fill_strategy <- function(chunk) {
   mean_steps <- mean(chunk$steps,na.rm = T);
   chunk[is.na(chunk$steps),]$steps <- mean_steps;
@@ -70,11 +70,11 @@ fill_strategy <- function(chunk) {
 }
 ```
 
-```{r _3_replace_na,echo=TRUE}
+```{r _3_replace_na}
 filled <- do.call(rbind, lapply(split(activity,activity$interval), function(chunk) fill_strategy(chunk)))
 ```
 
-```{r _4_stats,echo=TRUE}
+```{r _4_stats}
 sum_filled_steps_per_day <- aggregate(steps ~ date, data = filled, FUN = sum)
 ggplot(sum_filled_steps_per_day, aes(x=steps)) +
   geom_histogram(binwidth=1000, colour="black", fill="white") +
@@ -95,7 +95,7 @@ The impact of imputing missing data on the estimates of the total daily number o
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r _1_weekend_dataset,echo=TRUE}
+```{r _1_weekend_dataset}
 weekend_bool <- weekdays(filled$date) %in% c('Saturday','Sunday')
 weekend_factor <- factor(as.numeric(weekend_bool), labels=c("weekday", "weekend"))
 wdata <- cbind(filled, data.frame(weekend = weekend_factor))

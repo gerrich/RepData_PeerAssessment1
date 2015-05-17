@@ -1,10 +1,6 @@
 # Reproducible Research: Peer Assessment 1
 
 
-```r
-library(knitr)
-opts_chunk$set(echo=TRUE, fig.keep="all", fig.path="figure/")
-```
 
 ## Loading and preprocessing the data
 

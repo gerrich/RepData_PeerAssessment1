@@ -5,21 +5,111 @@ output:
     keep_md: true
 ---
 
+```{r setoptions,echo=TRUE}
+library(knitr)
+opts_chunk$set(echo=TRUE, fig.keep="all", fig.path="figure/")
+```
 
 ## Loading and preprocessing the data
 
-
+```{r _1_load_data,echo=TRUE}
+activity <- read.csv(unz("activity.zip","activity.csv"), header=T, colClasses=c("numeric","Date","numeric"))
+```
 
 ## What is mean total number of steps taken per day?
 
+```{r _1_sum_steps,echo=TRUE}
+good <- activity[!is.na(activity[[1]]),]
+total_steps <- sum(good$steps)
+```
+The total number of steps taken: `r total_steps`
 
+```{r _2_histogram,echo=TRUE}
+#head(good)
+sum_steps_per_day <- aggregate(steps ~ date, data = good, FUN = sum)
+library(ggplot2)
+ggplot(sum_steps_per_day, aes(x=steps)) +
+  geom_histogram(binwidth=1000, colour="black", fill="white") +
+  ggtitle("Total number of steps per day, ignore NA.")
+```
+
+```{r _3_total_steps_estimates,echo=TRUE}
+mean_steps <- mean(sum_steps_per_day$steps)
+med_steps <- median(sum_steps_per_day$steps)
+```
+Mean number of steps per day: `r mean_steps`
+Median number of steps per day: `r med_steps`
 
 ## What is the average daily activity pattern?
 
+```{r _1_avg_steps_plot,echo=TRUE}
+mean_steps_per_interval <- aggregate(steps ~ interval, data = good, FUN = mean)
+library(ggplot2)
+ggplot(mean_steps_per_interval, aes(x=interval, y=steps)) + geom_line()
+```
+
+```{r _2_max_activity_interval,echo=TRUE}
+max_id <- which.max(mean_steps_per_interval$steps)
+max_steps_interval <- mean_steps_per_interval$interval[max_id]
+```
+`r max_steps_interval` interval, on average across all the days in the dataset, contains the maximum number of steps.
 
 
 ## Imputing missing values
 
+```{r _1_missing_values,echo=TRUE}
+total_missing <- sum(is.na(activity[[1]]))
+```
+The total number of missing values in the dataset: `r total_missing`.
 
+```{r _2_fill_strategy,echo=TRUE}
+fill_strategy <- function(chunk) {
+  mean_steps <- mean(chunk$steps,na.rm = T);
+  chunk[is.na(chunk$steps),]$steps <- mean_steps;
+  chunk
+}
+```
+
+```{r _3_replace_na,echo=TRUE}
+filled <- do.call(rbind, lapply(split(activity,activity$interval), function(chunk) fill_strategy(chunk)))
+```
+
+```{r _4_stats,echo=TRUE}
+sum_filled_steps_per_day <- aggregate(steps ~ date, data = filled, FUN = sum)
+ggplot(sum_filled_steps_per_day, aes(x=steps)) +
+  geom_histogram(binwidth=1000, colour="black", fill="white") +
+  ggtitle("Total number of steps per day, filled.")
+
+mean_filled_steps <- mean(sum_filled_steps_per_day$steps)
+med_filled_steps <- median(sum_filled_steps_per_day$steps)
+```
+The mean total number of steps taken per day: `r mean_filled_steps`.
+The median total number of steps taken per day: `r med_filled_steps`.
+
+Mean estimate `r ifelse(mean_filled_steps == mean_steps, "not ", "") ` changed.
+Median estimate `r ifelse(med_filled_steps == med_steps, "not ", "") ` changed.
+
+The impact of imputing missing data on the estimates of the total daily number of steps:  
+- Difference in mean number of steps per day: `r mean_filled_steps - mean_steps`.  
+- Difference in median number of steps per day: `r med_filled_steps - med_steps`.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{r _1_weekend_dataset,echo=TRUE}
+weekend_bool <- weekdays(filled$date) %in% c('Saturday','Sunday')
+weekend_factor <- factor(as.numeric(weekend_bool), labels=c("weekday", "weekend"))
+wdata <- cbind(filled, data.frame(weekend = weekend_factor))
+```
+
+```{r _2_panel_plots,echo=T}
+library(ggplot2)
+
+mean_wday_steps <- aggregate(steps ~ interval + weekend, data=wdata, FUN=mean)
+
+p <- ggplot(mean_wday_steps, aes(x=interval, y=steps)) +
+    geom_line() +
+    ggtitle("Mean number of steps by 5-minute interval")
+
+p + facet_grid(weekend ~ .)
+```
+

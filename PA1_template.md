@@ -1,4 +1,9 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 
 
 
@@ -16,7 +21,7 @@ activity <- read.csv(unz("activity.zip","activity.csv"), header=T, colClasses=c(
 good <- activity[!is.na(activity[[1]]),]
 total_steps <- sum(good$steps)
 ```
-The total number of steps taken: 5.70608\times 10^{5}
+The total number of steps taken: 5.70608 &times; 10<sup>5</sup>
 
 
 ```r
@@ -28,15 +33,15 @@ ggplot(sum_steps_per_day, aes(x=steps)) +
   ggtitle("Total number of steps per day, ignore NA.")
 ```
 
-![](figure/_2_histogram-1.png) 
+![plot of chunk _2_histogram](figure/_2_histogram-1.png) 
 
 
 ```r
 mean_steps <- mean(sum_steps_per_day$steps)
 med_steps <- median(sum_steps_per_day$steps)
 ```
-Mean number of steps per day: 1.0766189\times 10^{4}
-Median number of steps per day: 1.0765\times 10^{4}
+Mean number of steps per day: 1.0766189 &times; 10<sup>4</sup>
+Median number of steps per day: 1.0765 &times; 10<sup>4</sup>
 
 ## What is the average daily activity pattern?
 
@@ -47,7 +52,7 @@ library(ggplot2)
 ggplot(mean_steps_per_interval, aes(x=interval, y=steps)) + geom_line()
 ```
 
-![](figure/_1_avg_steps_plot-1.png) 
+![plot of chunk _1_avg_steps_plot](figure/_1_avg_steps_plot-1.png) 
 
 
 ```r
@@ -87,14 +92,14 @@ ggplot(sum_filled_steps_per_day, aes(x=steps)) +
   ggtitle("Total number of steps per day, filled.")
 ```
 
-![](figure/_4_stats-1.png) 
+![plot of chunk _4_stats](figure/_4_stats-1.png) 
 
 ```r
 mean_filled_steps <- mean(sum_filled_steps_per_day$steps)
 med_filled_steps <- median(sum_filled_steps_per_day$steps)
 ```
-The mean total number of steps taken per day: 1.0766189\times 10^{4}.
-The median total number of steps taken per day: 1.0766189\times 10^{4}.
+The mean total number of steps taken per day: 1.0766189 &times; 10<sup>4</sup>.
+The median total number of steps taken per day: 1.0766189 &times; 10<sup>4</sup>.
 
 Mean estimate not  changed.
 Median estimate  changed.
@@ -125,5 +130,5 @@ p <- ggplot(mean_wday_steps, aes(x=interval, y=steps)) +
 p + facet_grid(weekend ~ .)
 ```
 
-![](figure/_2_panel_plots-1.png) 
+![plot of chunk _2_panel_plots](figure/_2_panel_plots-1.png) 
 
